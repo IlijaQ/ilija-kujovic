@@ -248,7 +248,7 @@ function App() {
             Let's stay in touch:
           </p>
           <div className="buttonContainer">
-            <a href="https://www.linkedin.com/in/ilija-kujovic/" target="_blank">
+            <a href="https://www.linkedin.com/in/ilija-kujovic-126352204" target="_blank">
               <img className="contactImg" src="/LinkedinLogo.png" ></img>
             </a>
           </div>
