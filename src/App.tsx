@@ -20,7 +20,7 @@ function App() {
     setDownloadSuccess(false);
 
     try {
-      const response = await fetch('https://download-virid.vercel.app/download/resume', {
+      const response = await fetch('https://download-pax1.onrender.com/api/download/resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
