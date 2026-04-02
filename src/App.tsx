@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createParticles } from "./three/particles";
 import * as three from "three";
-import { div } from "three/tsl";
 
 function App() {
   const mountRef = useRef<HTMLDivElement | null>(null);
