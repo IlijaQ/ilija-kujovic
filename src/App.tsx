@@ -141,7 +141,7 @@ function App() {
 
     <section style={{ position: "relative", zIndex: 2, height: "100vh" }}>
       <div className="heroSection">
-        <img className="portfolioImg" src="src/assets/ik200x200.jpg" />
+        <img className="portfolioImg" src="/ik.jpg" />
         <h1>Ilija Kujović</h1>
         <p>Software Developer</p>
       </div>
