@@ -193,6 +193,8 @@ function App() {
               onClick={handleDownloadResume}
               disabled={isLoading || pin.length !== 4}
               style={{
+                marginTop: "1rem",
+                marginRight: "1rem",
                 padding: "0.75rem 1.5rem",
                 fontSize: "1rem",
                 borderRadius: "8px",
