@@ -20,7 +20,7 @@ function App() {
     setDownloadSuccess(false);
 
     try {
-      const response = await fetch('https://localhost:44339/download/resume', {
+      const response = await fetch('https://download-virid.vercel.app/download/resume', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
