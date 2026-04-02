@@ -225,19 +225,19 @@ function App() {
           marginTop: "3rem"
         }}>
           <div className="flexGrayContainer">
-            <img src="src\assets\particleIcons\cSharpLogo.png" ></img>
+            <img src="/cSharpLogo.png" ></img>
             <p>ASP.NET, Widows Forms, WPF, SignalR, Selenium</p>
           </div>
           <div className="flexGrayContainer">
-            <img src="src\assets\particleIcons\aiLogo.png" ></img>
+            <img src="/aiLogo.png" ></img>
             <p>Browserable Agentic Browser, OpenAI API</p>
           </div>
           <div className="flexGrayContainer">
-            <img src="src\assets\particleIcons\memoryChipLogo.png" ></img>
+            <img src="/memoryChipLogo.png" ></img>
             <p>MSSQL, ArangoDB, Entity Framework, Dapper</p>
           </div>
           <div className="flexGrayContainer">
-            <img src="src\assets\particleIcons\reactLogo.png" ></img>
+            <img src="/reactLogo.png" ></img>
             <p>React, HTML, CSS</p>
           </div>
         </div>
@@ -247,12 +247,12 @@ function App() {
           </p>
           <div className="buttonContainer">
             <a href="https://www.linkedin.com/in/ilija-kujovic/" target="_blank">
-              <img className="contactImg" src="src\assets\particleIcons\LinkedinLogo.png" ></img>
+              <img className="contactImg" src="/LinkedinLogo.png" ></img>
             </a>
           </div>
           <div className="buttonContainer">
             <a href="https://github.com/ilijaq" target="_blank">
-              <img className="contactImg" src="src\assets\particleIcons\GithubIcoWhite.png" ></img>
+              <img className="contactImg" src="/GithubIcoWhite.png" ></img>
             </a>
           </div>
         </div>
