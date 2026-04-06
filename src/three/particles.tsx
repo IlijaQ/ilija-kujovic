@@ -10,7 +10,7 @@ export function createParticles(count = 5000, color = "#007bff"){
 
     geometry.setAttribute("position", new three.BufferAttribute(positions, 3));
 
-    const material = new three.PointsMaterial({ size: 0.03, color });
+    const material = new three.PointsMaterial({ size: 0.04, color });
     
 
     
