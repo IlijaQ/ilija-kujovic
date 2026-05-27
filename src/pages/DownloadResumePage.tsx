@@ -1,130 +1,133 @@
 import { useEffect, useRef, useState } from "react";
 import { createParticles } from "../three/particles";
-import * as three from "three";
+import * as THREE  from "three";
 import '../App.css';
 import './DownloadResumePage.css';
 
 
 function DownloadResumePage() {
-  const mountRef = useRef<HTMLDivElement | null>(null);
-  const [pin, setPin] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [downloadSuccess, setDownloadSuccess] = useState(false);
+    const mountRef = useRef<HTMLDivElement | null>(null);
+    const [pin, setPin] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [downloadSuccess, setDownloadSuccess] = useState(false);
 
-  const handleDownloadResume = async () => {
-    if (pin.length !== 4) {
-      setError('PIN mora imati 4 cifre');
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-    setDownloadSuccess(false);
-
-    try {
-      const response = await fetch('https://download-pax1.onrender.com/api/download/resume', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ pin }),
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'KujovicIlijaResume.pdf';
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        setPin('');
-        setDownloadSuccess(true);
-      } else {
-        if (response.status === 401) {
-          setError('Unauthorized PIN');
-        } else {
-          setError(response.statusText);
+    const handleDownloadResume = async () => {
+        if (pin.length !== 4) {
+            setError('PIN mora imati 4 cifre');
+            return;
         }
-      }
-    } catch (err) {
-      setError('Error Downloading Resume');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
+        setIsLoading(true);
+        setError('');
+        setDownloadSuccess(false);
 
-  useEffect(() => {
-    
-    const scene = new three.Scene();
-    scene.background = new three.Color("#121212");//#0f172a        // akcenat boje #007bff #39ff14
+        try {
+            const response = await fetch('https://download-pax1.onrender.com/api/download/resume', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin }),
+            });
 
-    const camera = new three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
-
-    const renderer = new three.WebGLRenderer({antialias: true});
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    
-    if (mountRef.current) {
-      mountRef.current.appendChild(renderer.domElement);
-    }
-
-
-    const particles = createParticles(500, "#007bff");
-    scene.add(particles);
-    
-    // Store references for scroll manipulation
-    const geometry = particles.geometry;
-    const positions = geometry.attributes.position.array as Float32Array;
-    const originalPositions = new Float32Array(positions);
-
-
-
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      particles.rotation.y += 0.007;
-      particles.rotation.x += 0.002;
-
-
-
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    window.addEventListener("scroll", () => {
-      const scroll = window.scrollY;
-      const scaleFactor = 1 + (scroll / 1000); // Increase width based on scroll
-      
-      // Update particle positions to increase width
-      for(let i = 0; i < positions.length; i += 3) {
-        positions[i] = originalPositions[i] * scaleFactor; // Scale X position
-        positions[i + 1] = originalPositions[i + 1]; // Keep Y unchanged
-        positions[i + 2] = originalPositions[i + 2]; // Keep Z unchanged
-      }
-      
-      geometry.attributes.position.needsUpdate = true;
-    });
-
-
-
-    return () => {
-      if (mountRef.current) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'KujovicIlijaResume.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                setPin('');
+                setDownloadSuccess(true);
+            } else {
+                if (response.status === 401) {
+                    setError('Unauthorized PIN');
+                } else {
+                    setError(response.statusText);
+                }
+            }     
+        } catch (err) {
+            setError('Error Downloading Resume');
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    useEffect(() => {
     
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color("#121212");//#0f172a        // akcenat boje #007bff #39ff14
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        const renderer = new THREE.WebGLRenderer({antialias: true});
+        var availableSceneHeight = window.innerHeight * 1.1;
+        renderer.setSize(window.innerWidth, availableSceneHeight);
+    
+        if (mountRef.current) {
+            mountRef.current.appendChild(renderer.domElement);
+        }
+
+        const particles = createParticles(500, "#007bff");
+        scene.add(particles);
+    
+        // Store references for scroll manipulation
+        const geometry = particles.geometry;
+        const positions = geometry.attributes.position.array as Float32Array;
+        const originalPositions = new Float32Array(positions);
+
+        const animate = () => {
+            requestAnimationFrame(animate);
+
+            particles.rotation.y += 0.007;
+            particles.rotation.x += 0.002;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        const handleWindowResize = () => {
+            if(window.innerHeight > availableSceneHeight) {
+                availableSceneHeight = window.innerHeight * 1.1;
+                console.log("Window resized");
+                camera.aspect = window.innerWidth / availableSceneHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, availableSceneHeight);
+            }
+        }
+
+        const handleScroll = () => {
+            const scroll = window.scrollY;
+            const scaleFactor = 1 + (scroll / 1000); // Increase width based on scroll
+      
+            // Update particle positions to increase width
+            for(let i = 0; i < positions.length; i += 3) {
+                positions[i] = originalPositions[i] * scaleFactor; // Scale X position
+                positions[i + 1] = originalPositions[i + 1]; // Keep Y unchanged
+                positions[i + 2] = originalPositions[i + 2]; // Keep Z unchanged
+            }
+      
+            geometry.attributes.position.needsUpdate = true;
+        }
+
+        window.addEventListener("resize", handleWindowResize);
+        window.addEventListener("scroll", handleScroll);
+
+        return () => {
+            window.removeEventListener("resize", handleWindowResize);
+            window.removeEventListener("scroll", handleScroll);
+
+            renderer.dispose();
+            geometry.dispose();
+            particles.material.dispose();
+
+            if (mountRef.current) {
+                mountRef.current.removeChild(renderer.domElement);
+            }
+        };
     }, []);
 
     return (
@@ -143,13 +146,12 @@ function DownloadResumePage() {
 
             <section style={{ position: "relative", zIndex: 2, height: "100vh" }}>
                 <div className="heroSection">
-                    <img className="portfolioImg" src="/ik.jpg" />
+                    <img className="portfolioImg" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
                     <h1>Ilija Kujović</h1>
-                    <p>Software Developer</p>
+                    <p>C# Software Developer | React Enthusiast</p>
                 </div>
             </section>
 
-            {/* Additional content for scrolling */}
             <section style={{ 
                 position: "relative", 
                 zIndex: 3, 
@@ -235,7 +237,6 @@ function DownloadResumePage() {
             </section>
         </div>
     );
-
 }
 
 export default DownloadResumePage

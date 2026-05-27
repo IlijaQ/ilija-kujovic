@@ -1,80 +1,89 @@
 import { useEffect, useRef } from "react";
 import { createParticles } from "../three/particles";
-import * as three from "three";
+import * as THREE from "three";
 import '../App.css';
 import './HomePage.css';
 
 
 function HomePage() {
-  const mountRef = useRef<HTMLDivElement | null>(null);
+    const mountRef = useRef<HTMLDivElement | null>(null);
 
   
-  useEffect(() => {
+    useEffect(() => {
     
-    const scene = new three.Scene();
-    scene.background = new three.Color("#121212");//#0f172a        // akcenat boje #007bff #39ff14
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color("#121212");//#0f172a        // akcenat boje #007bff #39ff14
 
-    const camera = new three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
 
-    const renderer = new three.WebGLRenderer({antialias: true});
-    renderer.setSize(window.innerWidth, window.innerHeight);
+        const renderer = new THREE.WebGLRenderer({antialias: true});
+        var availableSceneHeight = window.innerHeight * 1.1;
+        renderer.setSize(window.innerWidth, availableSceneHeight);
     
-    if (mountRef.current) {
-      mountRef.current.appendChild(renderer.domElement);
-    }
+        if (mountRef.current) {
+            mountRef.current.appendChild(renderer.domElement);
+        }
 
 
-    const particles = createParticles(500, "#007bff");
-    scene.add(particles);
+        const particles = createParticles(500, "#007bff");
+        scene.add(particles);
     
-    // Store references for scroll manipulation
-    const geometry = particles.geometry;
-    const positions = geometry.attributes.position.array as Float32Array;
-    const originalPositions = new Float32Array(positions);
+        // Store references for scroll manipulation
+        const geometry = particles.geometry;
+        const positions = geometry.attributes.position.array as Float32Array;
+        const originalPositions = new Float32Array(positions);
 
 
+        const animate = () => {
+            requestAnimationFrame(animate);
 
+            particles.rotation.y += 0.007;
+            particles.rotation.x += 0.002;
 
-    const animate = () => {
-      requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
 
-      particles.rotation.y += 0.007;
-      particles.rotation.x += 0.002;
-
-
-
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    window.addEventListener("resize", () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    window.addEventListener("scroll", () => {
-      const scroll = window.scrollY;
-      const scaleFactor = 1 + (scroll / 1000); // Increase width based on scroll
+        const handleWindowResize = () => {
+            if(window.innerHeight > availableSceneHeight) {
+                availableSceneHeight = window.innerHeight * 1.1;
+                console.log("Window resized");
+                camera.aspect = window.innerWidth / availableSceneHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, availableSceneHeight);
+            }
+        }
+    
+        const handleScroll = () => {
+            const scroll = window.scrollY;
+            const scaleFactor = 1 + (scroll / 1000); // Increase width based on scroll
       
-      // Update particle positions to increase width
-      for(let i = 0; i < positions.length; i += 3) {
-        positions[i] = originalPositions[i] * scaleFactor; // Scale X position
-        positions[i + 1] = originalPositions[i + 1]; // Keep Y unchanged
-        positions[i + 2] = originalPositions[i + 2]; // Keep Z unchanged
-      }
+            // Update particle positions to increase width
+            for(let i = 0; i < positions.length; i += 3) {
+                positions[i] = originalPositions[i] * scaleFactor; // Scale X position
+                positions[i + 1] = originalPositions[i + 1]; // Keep Y unchanged
+                positions[i + 2] = originalPositions[i + 2]; // Keep Z unchanged
+            }
       
-      geometry.attributes.position.needsUpdate = true;
-    });
+            geometry.attributes.position.needsUpdate = true;
+        };
 
+        window.addEventListener("resize", handleWindowResize);
+        window.addEventListener("scroll", handleScroll);
 
+        return () => {
+            window.removeEventListener("resize", handleWindowResize);
+            window.removeEventListener("scroll", handleScroll);
 
-    return () => {
-      if (mountRef.current) {
-        mountRef.current.removeChild(renderer.domElement);
-      }
-    };
+            renderer.dispose();
+            geometry.dispose();
+            particles.material.dispose();
+
+            if (mountRef.current) {
+                mountRef.current.removeChild(renderer.domElement);
+            }
+        };
     
     }, []);
 
@@ -94,13 +103,12 @@ function HomePage() {
 
             <section style={{ position: "relative", zIndex: 2, height: "100vh" }}>
                 <div className="heroSection">
-                    <img className="portfolioImg" src="/ik.jpg" />
+                    <img className="portfolioImg" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
                     <h1>Ilija Kujović</h1>
-                    <p>Software Developer</p>
+                    <p>C# Software Developer | React Enthusiast</p>
                 </div>      
             </section>  
 
-            {/* Additional content for scrolling */}
             <section style={{ 
                 position: "relative", 
                 zIndex: 3, 
@@ -121,15 +129,15 @@ function HomePage() {
                         <p>ASP.NET, Widows Forms, WPF, SignalR, Selenium</p>
                     </div>
                     <div className="flexGrayContainer">
-                        <img src="/aiLogo.png" ></img>
+                        <img src="/aiLogo.png" alt="AI logo" ></img>
                         <p>Browserable Agentic Browser, OpenAI API</p>
                     </div>
                     <div className="flexGrayContainer">
-                        <img src="/memoryChipLogo.png" ></img>
+                        <img src="/memoryChipLogo.png" alt="Database logo" ></img>
                         <p>MSSQL, ArangoDB, Entity Framework, Dapper</p>
                     </div>
                     <div className="flexGrayContainer">
-                        <img src="/reactLogo.png" ></img>
+                        <img src="/reactLogo.png" alt="React logo" ></img>
                         <p>React, HTML, CSS</p>
                     </div>
                     </div>
@@ -151,7 +159,6 @@ function HomePage() {
             </section>
         </div>
     );
-  
 }
 
 export default HomePage
