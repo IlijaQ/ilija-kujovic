@@ -7,7 +7,6 @@ import './HomePage.css';
 
 function HomePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
-
   
     useEffect(() => {
     
@@ -99,9 +98,9 @@ function HomePage() {
 
             <section style={{ position: "relative", zIndex: 2, height: "100vh" }}>
                 <div className="heroSection">
-                    <img className="portfolioImg" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
-                    <h1 className=" text-center">Ilija Kujović</h1>
-                    <p className=" text-center">C# Software Developer | React Enthusiast</p>
+                    <img className="portfolioImg fadeInUp" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
+                    <h1 className=" text-center fadeInUp delay-1">Ilija Kujović</h1>
+                    <p className=" text-center fadeInUp delay-2">C# Software Developer | React Enthusiast</p>
                 </div>      
             </section>  
 

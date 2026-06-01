@@ -143,9 +143,13 @@ function DownloadResumePage() {
 
             <section style={{ position: "relative", zIndex: 2, height: "100vh" }}>
                 <div className="heroSection">
-                    <img className="portfolioImg" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
-                    <h1>Ilija Kujović</h1>
-                    <p>C# Software Developer | React Enthusiast</p>
+                    <img className="portfolioImg fadeInUp" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
+                    <h1 className=" text-center fadeInUp delay-1">Ilija Kujović</h1>
+                    <p className=" text-center fadeInUp delay-2">
+                        <span>C# Software Developer</span>
+                        <br/>
+                        <span>React Enthusiast</span>
+                    </p>
                 </div>
             </section>
 
