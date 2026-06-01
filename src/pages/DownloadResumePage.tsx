@@ -73,7 +73,6 @@ function DownloadResumePage() {
 
         const globe = create3dGlobe("#007bff");
         scene.add(globe);
-        //positionGlobeAtLeftEdge(globe, camera);
         
         // Store references for scroll manipulation
         const globeStartXPosition = globe.position.x;
@@ -88,13 +87,19 @@ function DownloadResumePage() {
         animate();
 
         const handleWindowResize = () => {
-            if(window.innerHeight > availableSceneHeight) {
-                availableSceneHeight = window.innerHeight * 1.1;
-                console.log("Window resized");
-                camera.aspect = window.innerWidth / availableSceneHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, availableSceneHeight);
-            }
+            availableSceneHeight = window.innerHeight * 1.1;
+            console.log("Window resized");
+            
+            camera.aspect = window.innerWidth / availableSceneHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, availableSceneHeight);
+            
+            // Handle globe position
+            const globeRadius = (globe.geometry as THREE.SphereGeometry).parameters.radius;
+            const maxScroll = 500;
+            const t = Math.min(window.scrollY / maxScroll, 1);
+            
+            globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
         }
 
         const handleScroll = () => {
@@ -120,6 +125,9 @@ function DownloadResumePage() {
             window.removeEventListener("scroll", handleScroll);
 
             renderer.dispose();
+            globe.geometry.dispose();
+            (globe.material as THREE.Material).dispose();
+            scene.remove(globe);
 
             if (mountRef.current) {
                 mountRef.current.removeChild(renderer.domElement);

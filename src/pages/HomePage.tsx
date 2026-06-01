@@ -30,6 +30,7 @@ function HomePage() {
 
         // Store references for scroll manipulation
         const globeStartXPosition = globe.position.x;
+        
 
 
         const animate = () => {
@@ -42,13 +43,19 @@ function HomePage() {
         animate();
 
         const handleWindowResize = () => {
-            if(window.innerHeight > availableSceneHeight) {
-                availableSceneHeight = window.innerHeight * 1.1;
-                console.log("Window resized");
-                camera.aspect = window.innerWidth / availableSceneHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, availableSceneHeight);
-            }
+            availableSceneHeight = window.innerHeight * 1.1;
+            console.log("Window resized");
+
+            camera.aspect = window.innerWidth / availableSceneHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, availableSceneHeight);
+
+            // Handle globe position
+            const globeRadius = (globe.geometry as THREE.SphereGeometry).parameters.radius;
+            const maxScroll = 500;
+            const t = Math.min(window.scrollY / maxScroll, 1);
+
+            globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
         }
     
         const handleScroll = () => {
@@ -64,6 +71,7 @@ function HomePage() {
 
             // interpolacija: od globeStartX → globeStartX - radius/2
             globe.position.x = (1 - t) * globeStartXPosition + t * (globeStartXPosition + globeRadius * 1.1);
+
         };
 
         window.addEventListener("resize", handleWindowResize);
@@ -74,6 +82,10 @@ function HomePage() {
             window.removeEventListener("scroll", handleScroll);
 
             renderer.dispose();
+            
+            globe.geometry.dispose();
+            (globe.material as THREE.Material).dispose();
+            scene.remove(globe);
 
             if (mountRef.current) {
                 mountRef.current.removeChild(renderer.domElement);
@@ -101,6 +113,7 @@ function HomePage() {
                     <img className="portfolioImg fadeInUp" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
                     <h1 className=" text-center fadeInUp delay-1">Ilija Kujović</h1>
                     <p className=" text-center fadeInUp delay-2">C# Software Developer | React Enthusiast</p>
+                    
                 </div>      
             </section>  
 
