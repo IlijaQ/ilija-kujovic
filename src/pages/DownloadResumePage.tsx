@@ -7,6 +7,7 @@ import './DownloadResumePage.css';
 
 function DownloadResumePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
+    const [fadeOut, setFadeOut] = useState(false);
     const [pin, setPin] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -64,7 +65,7 @@ function DownloadResumePage() {
         camera.position.z = 5;
 
         const renderer = new THREE.WebGLRenderer({antialias: true});
-        var availableSceneHeight = window.innerHeight * 1.1;
+        var availableSceneHeight = window.innerHeight * 1.15;
         renderer.setSize(window.innerWidth, availableSceneHeight);
     
         if (mountRef.current) {
@@ -114,6 +115,8 @@ function DownloadResumePage() {
         }
 
         const handleScroll = () => {
+            setFadeOut(true);
+
             const scroll = window.scrollY;
             // Fade in globe
             const globeFadeInFactor = Math.min(scroll / 500, 1);
@@ -166,6 +169,9 @@ function DownloadResumePage() {
                         <span>C# Software Developer</span>
                         <br/>
                         <span>React Enthusiast</span>
+                    </p>
+                    <p className={`scrollHint ${fadeOut ? "fadeOut" : "fadeInUp delay-3"}`}>
+                        ↓ Scroll Down ↓
                     </p>
                 </div>
             </section>

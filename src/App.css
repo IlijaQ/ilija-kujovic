@@ -14,16 +14,29 @@
   animation: fadeInUp 0.8s ease forwards;
 }
 
-.fadeInUp.delay-1 {
-  animation-delay: 0.3s;
+.fadeInUp.delay-1 { animation-delay: 0.3s; }
+.fadeInUp.delay-2 { animation-delay: 0.6s; }
+.fadeInUp.delay-3 { animation-delay: 0.9s; }
+
+.scrollHint {
+  margin-top: 50px;
+  font-size: 24px;
+  color: #7f919ca1;
 }
 
-.fadeInUp.delay-2 {
-  animation-delay: 0.6s;
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
-.fadeInUp.delay-3 {
-  animation-delay: 0.9s;
+.fadeOut {
+  opacity: 1;
+  pointer-events: none;
+  animation: fadeOut 0.8s ease forwards;
 }
 
 .downloadButton{

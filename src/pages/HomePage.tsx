@@ -1,13 +1,14 @@
-import { useEffect, useRef } from "react";
-import { create3dGlobe } from "../three/globe";
 import * as THREE from "three";
+import { useEffect, useRef, useState } from "react";
+import { create3dGlobe } from "../three/globe";
 import '../App.css';
 import './HomePage.css';
 
 
 function HomePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
-  
+    const [fadeOut, setFadeOut] = useState(false);
+
     useEffect(() => {
     
         const scene = new THREE.Scene();
@@ -17,7 +18,7 @@ function HomePage() {
         camera.position.z = 5;
 
         const renderer = new THREE.WebGLRenderer({antialias: true});
-        var availableSceneHeight = window.innerHeight * 1.1;
+        var availableSceneHeight = window.innerHeight * 1.15;
         renderer.setSize(window.innerWidth, availableSceneHeight);
     
         if (mountRef.current) {
@@ -29,14 +30,10 @@ function HomePage() {
 
         // Store references for scroll manipulation
         const globeStartXPosition = globe.position.x;
-        
-
 
         const animate = () => {
             requestAnimationFrame(animate);
-
             globe.rotation.y += 0.005;
-
             renderer.render(scene, camera);
         }
         animate();
@@ -69,6 +66,8 @@ function HomePage() {
         }
     
         const handleScroll = () => {
+            setFadeOut(true); 
+
             const scroll = window.scrollY;
             // Fade in globe
             const globeFadeInFactor = Math.min(scroll / 500, 1);
@@ -121,7 +120,9 @@ function HomePage() {
                     <img className="portfolioImg fadeInUp" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
                     <h1 className=" text-center fadeInUp delay-1">Ilija Kujović</h1>
                     <p className=" text-center fadeInUp delay-2">C# Software Developer | React Enthusiast</p>
-                    
+                    <p className={`scrollHint ${fadeOut ? "fadeOut" : "fadeInUp delay-3"}`}>
+                        ↓ Scroll Down ↓
+                    </p>
                 </div>      
             </section>  
 
