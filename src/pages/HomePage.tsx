@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { create3dGlobe } from "../three/globe";
 import * as THREE from "three";
 import '../App.css';
 import './HomePage.css';
@@ -24,13 +25,18 @@ function HomePage() {
             mountRef.current.appendChild(renderer.domElement);
         }
 
+        const globe = create3dGlobe("#007bff");
+        scene.add(globe);
+        //positionGlobeAtLeftEdge(globe, camera);
 
         // Store references for scroll manipulation
+        const globeStartXPosition = globe.position.x;
 
 
         const animate = () => {
             requestAnimationFrame(animate);
 
+            globe.rotation.y += 0.005;
 
             renderer.render(scene, camera);
         }
@@ -48,6 +54,17 @@ function HomePage() {
     
         const handleScroll = () => {
             const scroll = window.scrollY;
+            // Fade in globe
+            const globeFadeInFactor = Math.min(scroll / 500, 1);
+            globe.material.opacity = globeFadeInFactor;
+            
+            // Pomeri globe ulevo od početne pozicije
+            const globeRadius = (globe.geometry as THREE.SphereGeometry).parameters.radius;
+            const maxScroll = 500; // koliko skrola treba da završi pomeraj
+            const t = Math.min(scroll / maxScroll, 1); // normalizovan faktor 0 → 1
+
+            // interpolacija: od globeStartX → globeStartX - radius/2
+            globe.position.x = (1 - t) * globeStartXPosition + t * (globeStartXPosition + globeRadius * 1.1);
         };
 
         window.addEventListener("resize", handleWindowResize);
