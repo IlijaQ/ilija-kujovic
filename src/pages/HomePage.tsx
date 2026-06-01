@@ -26,7 +26,6 @@ function HomePage() {
 
         const globe = create3dGlobe("#007bff");
         scene.add(globe);
-        //positionGlobeAtLeftEdge(globe, camera);
 
         // Store references for scroll manipulation
         const globeStartXPosition = globe.position.x;
@@ -43,19 +42,30 @@ function HomePage() {
         animate();
 
         const handleWindowResize = () => {
-            availableSceneHeight = window.innerHeight * 1.1;
-            console.log("Window resized");
+            const newHeight = window.innerHeight;
+            const newWidth = window.innerWidth;
+            const newAvailableSceneHeight = newHeight * 1.15;
+            const oldHeight = availableSceneHeight / 1.15;
 
-            camera.aspect = window.innerWidth / availableSceneHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, availableSceneHeight);
-
-            // Handle globe position
-            const globeRadius = (globe.geometry as THREE.SphereGeometry).parameters.radius;
-            const maxScroll = 500;
-            const t = Math.min(window.scrollY / maxScroll, 1);
-
-            globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
+            if (
+                newHeight < oldHeight ||
+                newHeight > oldHeight * 1.15 ||
+                newWidth !== renderer.domElement.width
+            ) {
+                availableSceneHeight = newAvailableSceneHeight;
+                console.log("Window resized");
+                        
+                camera.aspect = window.innerWidth / availableSceneHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, availableSceneHeight);
+                        
+                // Handle globe position
+                const globeRadius = (globe.geometry as THREE.SphereGeometry).parameters.radius;
+                const maxScroll = 500;
+                const t = Math.min(window.scrollY / maxScroll, 1);
+                
+                globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
+            }
         }
     
         const handleScroll = () => {
@@ -64,12 +74,10 @@ function HomePage() {
             const globeFadeInFactor = Math.min(scroll / 500, 1);
             globe.material.opacity = globeFadeInFactor;
             
-            // Pomeri globe ulevo od početne pozicije
+            // Globe movement
             const globeRadius = (globe.geometry as THREE.SphereGeometry).parameters.radius;
-            const maxScroll = 500; // koliko skrola treba da završi pomeraj
-            const t = Math.min(scroll / maxScroll, 1); // normalizovan faktor 0 → 1
-
-            // interpolacija: od globeStartX → globeStartX - radius/2
+            const maxScroll = 500;
+            const t = Math.min(scroll / maxScroll, 1)
             globe.position.x = (1 - t) * globeStartXPosition + t * (globeStartXPosition + globeRadius * 1.1);
 
         };
