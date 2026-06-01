@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { createParticles } from "../three/particles";
 import * as THREE from "three";
 import '../App.css';
 import './HomePage.css';
@@ -26,20 +25,12 @@ function HomePage() {
         }
 
 
-        const particles = createParticles(500, "#007bff");
-        scene.add(particles);
-    
         // Store references for scroll manipulation
-        const geometry = particles.geometry;
-        const positions = geometry.attributes.position.array as Float32Array;
-        const originalPositions = new Float32Array(positions);
 
 
         const animate = () => {
             requestAnimationFrame(animate);
 
-            particles.rotation.y += 0.007;
-            particles.rotation.x += 0.002;
 
             renderer.render(scene, camera);
         }
@@ -57,16 +48,6 @@ function HomePage() {
     
         const handleScroll = () => {
             const scroll = window.scrollY;
-            const scaleFactor = 1 + (scroll / 1000); // Increase width based on scroll
-      
-            // Update particle positions to increase width
-            for(let i = 0; i < positions.length; i += 3) {
-                positions[i] = originalPositions[i] * scaleFactor; // Scale X position
-                positions[i + 1] = originalPositions[i + 1]; // Keep Y unchanged
-                positions[i + 2] = originalPositions[i + 2]; // Keep Z unchanged
-            }
-      
-            geometry.attributes.position.needsUpdate = true;
         };
 
         window.addEventListener("resize", handleWindowResize);
@@ -77,8 +58,6 @@ function HomePage() {
             window.removeEventListener("scroll", handleScroll);
 
             renderer.dispose();
-            geometry.dispose();
-            particles.material.dispose();
 
             if (mountRef.current) {
                 mountRef.current.removeChild(renderer.domElement);
@@ -104,8 +83,8 @@ function HomePage() {
             <section style={{ position: "relative", zIndex: 2, height: "100vh" }}>
                 <div className="heroSection">
                     <img className="portfolioImg" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
-                    <h1>Ilija Kujović</h1>
-                    <p>C# Software Developer | React Enthusiast</p>
+                    <h1 className=" text-center">Ilija Kujović</h1>
+                    <p className=" text-center">C# Software Developer | React Enthusiast</p>
                 </div>      
             </section>  
 
