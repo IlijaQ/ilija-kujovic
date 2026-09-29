@@ -7,6 +7,8 @@ import './HomePage.css';
 
 function HomePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
+    const stackWrapperRef = useRef<HTMLDivElement | null>(null);
+    const stackItemRefs = useRef<(HTMLDivElement | null)[]>([]);
     const [fadeOut, setFadeOut] = useState(false);
 
     useEffect(() => {
@@ -38,6 +40,51 @@ function HomePage() {
         }
         animate();
 
+        // Sequential zoom-in/zoom-out stack for the flexGrayContainer cards.
+        const STACK_ITEM_COUNT = 4;
+        const CYCLE_RATIO = 1.5;      // one viewport height per full zoom in/out cycle
+        const OFFSET_RATIO = 0.25; // next card starts once predecessor has zoomed in to 25% size
+        const TRAVEL_RATIO = 0.5;   // vertical travel per cycle, as a fraction of viewport height
+
+        const updateStackHeight = () => {
+            const wrapper = stackWrapperRef.current;
+            if (!wrapper) return;
+
+            const cyclePx = window.innerHeight * CYCLE_RATIO;
+            const offsetPx = cyclePx * OFFSET_RATIO;
+            const totalPx = offsetPx * (STACK_ITEM_COUNT - 1) + cyclePx;
+            wrapper.style.height = `${totalPx}px`;
+        };
+
+        const handleStackScroll = () => {
+            const wrapper = stackWrapperRef.current;
+            if (!wrapper) return;
+
+            const cyclePx = window.innerHeight * CYCLE_RATIO;
+            const offsetPx = cyclePx * OFFSET_RATIO;
+            const travelPx = window.innerHeight * TRAVEL_RATIO;
+            const wrapperTop = wrapper.getBoundingClientRect().top + window.scrollY;
+            const localScroll = window.scrollY - wrapperTop;
+
+            stackItemRefs.current.forEach((el, i) => {
+                if (!el) return;
+
+                const start = i * offsetPx;
+                const p = Math.min(Math.max((localScroll - start) / cyclePx, 0), 1);
+                // Zoom in for the first half of the cycle, zoom back out for the second half.
+                const scale = p <= 0.5 ? p / 0.5 : (1 - p) / 0.5;
+                // Bottom of screen at p=0, middle at p=0.5, top at p=1.
+                const translateY = (0.5 - p) * travelPx;
+
+                el.style.opacity = String(scale);
+                el.style.transform = `translateY(${translateY}px) scale(${scale})`;
+                el.style.pointerEvents = scale > 0.1 ? "auto" : "none";
+            });
+        };
+
+        updateStackHeight();
+        handleStackScroll();
+
         const handleWindowResize = () => {
             const newHeight = window.innerHeight;
             const newWidth = window.innerWidth;
@@ -63,7 +110,10 @@ function HomePage() {
                 
                 globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
             }
-        }
+
+            updateStackHeight();
+            handleStackScroll();
+        };
     
         const handleScroll = () => {
             setFadeOut(true); 
@@ -79,6 +129,7 @@ function HomePage() {
             const t = Math.min(scroll / maxScroll, 1)
             globe.position.x = (1 - t) * globeStartXPosition + t * (globeStartXPosition + globeRadius * 1.1);
 
+            handleStackScroll();
         };
 
         window.addEventListener("resize", handleWindowResize);
@@ -135,29 +186,32 @@ function HomePage() {
                 minHeight: "100vh"
             }}>
         
-                <div style={{ 
-                display: "grid", 
-                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", 
-                gap: "2rem",
-                marginTop: "3rem"
-                }}>
-                    <div className="flexGrayContainer">
-                        <img src="/cSharpLogo.png" ></img>
-                        <p>ASP.NET, Widows Forms, WPF, SignalR, Selenium</p>
+                <div className="stackWrapper" ref={stackWrapperRef}>
+                    <div className="stackItem">
+                        <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[0] = el; }}>
+                            <img src="/cSharpLogo.png" ></img>
+                            <p>ASP.NET, Widows Forms, WPF, SignalR, Selenium</p>
+                        </div>
                     </div>
-                    <div className="flexGrayContainer">
-                        <img src="/aiLogo.png" alt="AI logo" ></img>
-                        <p>Browserable Agentic Browser, OpenAI API</p>
+                    <div className="stackItem">
+                        <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[1] = el; }}>
+                            <img src="/aiLogo.png" alt="AI logo" ></img>
+                            <p>Browserable Agentic Browser, OpenAI API</p>
+                        </div>
                     </div>
-                    <div className="flexGrayContainer">
-                        <img src="/memoryChipLogo.png" alt="Database logo" ></img>
-                        <p>MSSQL, ArangoDB, Entity Framework, Dapper</p>
+                    <div className="stackItem">
+                        <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[2] = el; }}>
+                            <img src="/memoryChipLogo.png" alt="Database logo" ></img>
+                            <p>MSSQL, ArangoDB, Entity Framework, Dapper</p>
+                        </div>
                     </div>
-                    <div className="flexGrayContainer">
-                        <img src="/reactLogo.png" alt="React logo" ></img>
-                        <p>React, HTML, CSS</p>
+                    <div className="stackItem">
+                        <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[3] = el; }}>
+                            <img src="/reactLogo.png" alt="React logo" ></img>
+                            <p>React, HTML, CSS</p>
+                        </div>
                     </div>
-                    </div>
+                </div>
                     <div className="contactSection">
                     <p style={{ fontSize: "1.2rem", lineHeight: 1.6, marginBottom: "0.2rem" }}>
                         Let's stay in touch:
