@@ -109,10 +109,11 @@ function HomePage() {
                 const t = Math.min(window.scrollY / maxScroll, 1);
                 
                 globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
-            }
 
-            updateStackHeight();
-            handleStackScroll();
+                // Handle Scrool Stack positions
+                handleStackScroll();
+                updateStackHeight();
+            }
         };
     
         const handleScroll = () => {
