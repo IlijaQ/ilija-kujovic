@@ -4,6 +4,10 @@ import { create3dGlobe } from "../three/globe";
 import '../App.css';
 import './HomePage.css';
 
+const breakAtCommas = (text: string) => {
+    return text.split(', ').map(segment => segment.replace(/ /g, ' ')).join(', ');
+};
+
 
 function HomePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
@@ -41,7 +45,7 @@ function HomePage() {
         animate();
 
         // Sequential zoom-in/zoom-out stack for the flexGrayContainer cards.
-        const STACK_ITEM_COUNT = 4;
+        const STACK_ITEM_COUNT = 5;
         const CYCLE_RATIO = 1.5;      // one viewport height per full zoom in/out cycle
         const OFFSET_RATIO = 0.25; // next card starts once predecessor has zoomed in to 25% size
         const TRAVEL_RATIO = 0.5;   // vertical travel per cycle, as a fraction of viewport height
@@ -191,27 +195,34 @@ function HomePage() {
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[0] = el; }}>
                             <img src="/cSharpLogo.png" ></img>
-                            <p>ASP.NET, Widows Forms, WPF, SignalR, Selenium</p>
+                            <p>{breakAtCommas("C#, ASP.NET, REST APIs, SignalR")}</p>
                         </div>
                     </div>
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[1] = el; }}>
                             <img src="/aiLogo.png" alt="AI logo" ></img>
-                            <p>Browserable Agentic Browser, OpenAI API</p>
+                            <p>{breakAtCommas("Claude, OpenAI API, AI Agents, Prompt Enginerring")}</p>
                         </div>
                     </div>
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[2] = el; }}>
                             <img src="/memoryChipLogo.png" alt="Database logo" ></img>
-                            <p>MSSQL, ArangoDB, Entity Framework, Dapper</p>
+                            <p>{breakAtCommas("MSSQL, ArangoDB, Entity Framework, Dapper")}</p>
                         </div>
                     </div>
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[3] = el; }}>
                             <img src="/reactLogo.png" alt="React logo" ></img>
-                            <p>React, HTML, CSS</p>
+                            <p>{breakAtCommas("React, TypeScript, Modern Frontend")}</p>
                         </div>
                     </div>
+                    <div className="stackItem">
+                        <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[4] = el; }}>
+                            <img src="/GearLogo.png" alt="Gear logo" ></img>
+                            <p>{breakAtCommas("Selenium, Web Scraping, API Integration")}</p>
+                        </div>
+                    </div>
+                
                 </div>
                     <div className="contactSection">
                     <p style={{ fontSize: "1.2rem", lineHeight: 1.6, marginBottom: "0.2rem" }}>
