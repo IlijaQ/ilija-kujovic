@@ -82,11 +82,41 @@ canvas {
   color: white;
 }
 
-.contactSection{
+.contactSpacer {
+  height: 50vh;
+}
+
+.contactSection {
+  position: fixed;
+  left: 2rem;
+  right: 2rem;
+  bottom: 2rem;
+  z-index: 5;
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   align-items: center;
-  padding-top: 50px;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.contactSection .buttonContainer {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.contactText {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: white;
+  margin-left: 0.5rem;
+  opacity: 0;
+  transform: translateX(3rem);
+  transition: opacity 1.5s ease, transform 1.5s ease;
+}
+
+.contactText.visible {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .flexGrayContainer {

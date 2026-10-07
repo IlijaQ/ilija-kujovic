@@ -53,6 +53,9 @@ function HomePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
     const stackWrapperRef = useRef<HTMLDivElement | null>(null);
     const stackItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const contactRowRef = useRef<HTMLDivElement | null>(null);
+    const contactItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const contactTextRef = useRef<HTMLParagraphElement | null>(null);
     const [fadeOut, setFadeOut] = useState(false);
 
     useEffect(() => {
@@ -126,8 +129,37 @@ function HomePage() {
             });
         };
 
+        // Contact icons fly from far right to far left over the last CONTACT_RANGE_RATIO of the page scroll.
+        const CONTACT_RANGE_RATIO = 0.5;   // scroll distance (fraction of viewport height) the whole motion spans
+        const CONTACT_OVERLAP = 0.7;       // next icon starts when the previous one is 70% done
+
+        const handleContactScroll = () => {
+            const row = contactRowRef.current;
+            const items = contactItemRefs.current.filter((el): el is HTMLDivElement => !!el);
+            if (!row || items.length === 0) return;
+
+            const rangePx = window.innerHeight * CONTACT_RANGE_RATIO;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const q = Math.min(Math.max((window.scrollY - (maxScroll - rangePx)) / rangePx, 0), 1);
+
+            // Item i runs for `d` of the range and starts at i * CONTACT_OVERLAP * d; last one ends at 1.
+            const d = 1 / (1 + (items.length - 1) * CONTACT_OVERLAP);
+            const rowWidth = row.clientWidth;
+
+            items.forEach((el, i) => {
+                const p = Math.min(Math.max((q - i * CONTACT_OVERLAP * d) / d, 0), 1);
+                const startOffset = rowWidth - (el.offsetLeft + el.offsetWidth);
+                el.style.transform = `translateX(${(1 - p) * startOffset}px)`;
+                el.style.opacity = String(Math.min(p * 5, 1));
+                el.style.pointerEvents = p > 0.9 ? "auto" : "none";
+            });
+
+            contactTextRef.current?.classList.toggle("visible", q >= 0.999);
+        };
+
         updateStackHeight();
         handleStackScroll();
+        handleContactScroll();
 
         const handleWindowResize = () => {
             const newHeight = window.innerHeight;
@@ -157,6 +189,7 @@ function HomePage() {
                 // Handle Scrool Stack positions
                 handleStackScroll();
                 updateStackHeight();
+                handleContactScroll();
             }
         };
     
@@ -175,13 +208,16 @@ function HomePage() {
             globe.position.x = (1 - t) * globeStartXPosition + t * (globeStartXPosition + globeRadius * 1.1);
 
             handleStackScroll();
+            handleContactScroll();
         };
 
         window.addEventListener("resize", handleWindowResize);
+        window.addEventListener("resize", handleContactScroll);
         window.addEventListener("scroll", handleScroll);
 
         return () => {
             window.removeEventListener("resize", handleWindowResize);
+            window.removeEventListener("resize", handleContactScroll);
             window.removeEventListener("scroll", handleScroll);
 
             renderer.dispose();
@@ -264,20 +300,21 @@ function HomePage() {
                     </div>
                 
                 </div>
-                    <div className="contactSection">
-                    <p style={{ fontSize: "1.2rem", lineHeight: 1.6, marginBottom: "0.2rem" }}>
-                        Let's stay in touch:
-                    </p>
-                    <div className="buttonContainer">
+                <div className="contactSpacer" />
+                <div className="contactSection" ref={contactRowRef}>
+                    <div className="buttonContainer" ref={(el) => { contactItemRefs.current[0] = el; }}>
                         <a href="https://www.linkedin.com/in/ilija-kujovic-126352204" target="_blank">
                         <img className="contactImg" src="/LinkedinLogo.png" ></img>
                         </a>
                     </div>
-                    <div className="buttonContainer">
+                    <div className="buttonContainer" ref={(el) => { contactItemRefs.current[1] = el; }}>
                         <a href="https://github.com/ilijaq" target="_blank">
                         <img className="contactImg" src="/GithubIcoWhite.png" ></img>
                         </a>
                     </div>
+                    <p className="contactText" ref={contactTextRef}>
+                        Let's stay in touch
+                    </p>
                 </div>
             </section>
         </div>
