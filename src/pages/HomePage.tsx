@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { create3dGlobe } from "../three/globe";
 import '../App.css';
 import './HomePage.css';
@@ -8,6 +8,46 @@ const breakAtCommas = (text: string) => {
     return text.split(', ').map(segment => segment.replace(/ /g, ' ')).join(', ');
 };
 
+function breakAtPipe(text: string) {
+    const rootRef = useRef<HTMLSpanElement | null>(null);
+
+    useLayoutEffect(() => {
+        const root = rootRef.current;
+        const container = root?.parentElement;
+        if (!root || !container) return;
+
+        // Hide a pipe when the line wraps right after it (next segment starts on a lower line).
+        const update = () => {
+            const segments = root.querySelectorAll<HTMLElement>(".pipe-segment");
+            root.querySelectorAll<HTMLElement>(".pipe-separator").forEach((sep, i) => {
+                const wrapped = sep.offsetTop !== segments[i + 1].offsetTop;
+                sep.style.visibility = wrapped ? "hidden" : "visible";
+            });
+        };
+
+        update();
+        const observer = new ResizeObserver(update);
+        observer.observe(container);
+        return () => observer.disconnect();
+    }, [text]);
+
+    const parts = text.split('|').map(part => part.trim());
+    return (
+        <span ref={rootRef}>
+            {parts.map((part, idx) => (
+                <Fragment key={idx}>
+                    <span className="pipe-segment">{breakAtCommas(part)}</span>
+                    {idx < parts.length - 1 && (
+                        <>
+                            <span className="pipe-separator">{" |"}</span>
+                            {" "}
+                        </>
+                    )}
+                </Fragment>
+            ))}
+        </span>
+    );
+}
 
 function HomePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
@@ -175,7 +215,7 @@ function HomePage() {
                 <div className="heroSection">
                     <img className="portfolioImg fadeInUp" src="/ik.jpg" alt="Profile picture of Ilija Kujovic" />
                     <h1 className=" text-center fadeInUp delay-1">Ilija Kujović</h1>
-                    <p className=" text-center fadeInUp delay-2">C# Software Developer | React Enthusiast</p>
+                    <p className=" text-center fadeInUp delay-2">{breakAtPipe("C# Software Developer | React Enthusiast")}</p>
                     <p className={`scrollHint ${fadeOut ? "fadeOut" : "fadeInUp delay-3"}`}>
                         ↓ Scroll Down ↓
                     </p>
@@ -195,31 +235,31 @@ function HomePage() {
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[0] = el; }}>
                             <img src="/cSharpLogo.png" ></img>
-                            <p>{breakAtCommas("C#, ASP.NET, REST APIs, SignalR")}</p>
+                            <p>{breakAtPipe("C# | ASP.NET | REST APIs | SignalR")}</p>
                         </div>
                     </div>
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[1] = el; }}>
                             <img src="/aiLogo.png" alt="AI logo" ></img>
-                            <p>{breakAtCommas("Claude, OpenAI API, AI Agents, Prompt Enginerring")}</p>
+                            <p>{breakAtPipe("Claude | OpenAI API | AI Agents | Prompt Enginerring")}</p>
                         </div>
                     </div>
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[2] = el; }}>
                             <img src="/memoryChipLogo.png" alt="Database logo" ></img>
-                            <p>{breakAtCommas("MSSQL, ArangoDB, Entity Framework, Dapper")}</p>
+                            <p>{breakAtPipe("MSSQL | ArangoDB | Entity Framework | Dapper")}</p>
                         </div>
                     </div>
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[3] = el; }}>
                             <img src="/reactLogo.png" alt="React logo" ></img>
-                            <p>{breakAtCommas("React, TypeScript, Modern Frontend")}</p>
+                            <p>{breakAtPipe("React | TypeScript | Modern Frontend")}</p>
                         </div>
                     </div>
                     <div className="stackItem">
                         <div className="flexGrayContainer" ref={(el) => { stackItemRefs.current[4] = el; }}>
                             <img src="/GearLogo.png" alt="Gear logo" ></img>
-                            <p>{breakAtCommas("Selenium, Web Scraping, API Integration")}</p>
+                            <p>{breakAtPipe("Selenium | Web Scraping | API Integration")}</p>
                         </div>
                     </div>
                 
