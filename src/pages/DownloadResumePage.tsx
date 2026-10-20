@@ -3,7 +3,63 @@ import { create3dGlobe } from "../three/globe";
 import * as THREE  from "three";
 import '../App.css';
 import './DownloadResumePage.css';
+import { BASE_URL } from "../commonVariables.ts";
 
+const DOWNLOAD_URL_KEYS = ['url', 'downloadUrl', 'download_url', 'link', 'downloadLink', 'download_link'];
+
+
+async function openServerLink(path: string): Promise<void> {
+    const newTab = window.open('', '_blank');
+    if (newTab) newTab.opener = null;
+
+    try {
+        const response = await fetch(BASE_URL + path);
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`);
+        }
+
+        const link = await extractDownloadUrl(response);
+        if (!link) {
+            throw new Error('Server did not return a link');
+        }
+
+        if (newTab) {
+            newTab.location.href = link;
+        } else {
+            window.open(link, '_blank', 'noopener,noreferrer');
+        }
+    } catch (err) {
+        newTab?.close();
+        console.error(`Failed to open link for ${path}`, err);
+    }
+}
+async function extractDownloadUrl(response: Response): Promise<string | null> {
+    const text = (await response.text()).trim();
+    if (isHttpUrl(text)) return text;
+
+    try {
+        const data: unknown = JSON.parse(text);
+        if (isHttpUrl(data)) return data;
+        if (data && typeof data === 'object') {
+            for (const key of DOWNLOAD_URL_KEYS) {
+                const candidate = (data as Record<string, unknown>)[key];
+                if (isHttpUrl(candidate)) return candidate;
+            }
+        }
+    } catch {
+        // Not JSON and not a bare URL; fall through.
+    }
+    return null;
+}
+function isHttpUrl(value: unknown): value is string {
+    if (typeof value !== 'string') return false;
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+    } catch {
+        return false;
+    }
+}
 
 function DownloadResumePage() {
     const mountRef = useRef<HTMLDivElement | null>(null);
@@ -12,6 +68,10 @@ function DownloadResumePage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [downloadSuccess, setDownloadSuccess] = useState(false);
+    const contactRowRef = useRef<HTMLDivElement | null>(null);
+    const contactItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const contactTextRef = useRef<HTMLParagraphElement | null>(null);
+
 
     const handleDownloadResume = async () => {
         if (pin.length !== 4) {
@@ -24,22 +84,22 @@ function DownloadResumePage() {
         setDownloadSuccess(false);
 
         try {
-            const response = await fetch('https://download-pax1.onrender.com/api/download/resume', {
+            const response = await fetch(BASE_URL + '/1ctvd', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pin }),
             });
 
             if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'KujovicIlijaResume.pdf';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
+                const downloadUrl = await extractDownloadUrl(response);
+                if (!downloadUrl) {
+                    setError('Server did not return a download link');
+                    return;
+                }
+                // The link points to Google Drive and serves the file as an
+                // attachment, so navigating to it starts the download without
+                // leaving this page.
+                window.location.assign(downloadUrl);
                 setPin('');
                 setDownloadSuccess(true);
             } else {
@@ -111,8 +171,37 @@ function DownloadResumePage() {
                 const t = Math.min(window.scrollY / maxScroll, 1);
                 
                 globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
+
+                
             }
         }
+        
+        const CONTACT_RANGE_RATIO = 0.5;   // scroll distance (fraction of viewport height) the whole motion spans
+        const CONTACT_OVERLAP = 0.7;       // next icon starts when the previous one is 70% done
+
+        const handleContactScroll = () => {
+            const row = contactRowRef.current;
+            const items = contactItemRefs.current.filter((el): el is HTMLDivElement => !!el);
+            if (!row || items.length === 0) return;
+
+            const rangePx = window.innerHeight * CONTACT_RANGE_RATIO;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const q = Math.min(Math.max((window.scrollY - (maxScroll - rangePx)) / rangePx, 0), 1);
+
+            // Item i runs for `d` of the range and starts at i * CONTACT_OVERLAP * d; last one ends at 1.
+            const d = 1 / (1 + (items.length - 1) * CONTACT_OVERLAP);
+            const rowWidth = row.clientWidth;
+
+            items.forEach((el, i) => {
+                const p = Math.min(Math.max((q - i * CONTACT_OVERLAP * d) / d, 0), 1);
+                const startOffset = rowWidth - (el.offsetLeft + el.offsetWidth);
+                el.style.transform = `translateX(${(1 - p) * startOffset}px)`;
+                el.style.opacity = String(Math.min(p * 5, 1));
+                el.style.pointerEvents = p > 0.9 ? "auto" : "none";
+            });
+
+            contactTextRef.current?.classList.toggle("visible", q >= 0.999);
+        };
 
         const handleScroll = () => {
             setFadeOut(true);
@@ -127,6 +216,8 @@ function DownloadResumePage() {
             const maxScroll = 500;
             const t = Math.min(scroll / maxScroll, 1);
             globe.position.x = (1 - t) * globeStartXPosition + t * (globeStartXPosition + globeRadius * 1.1);
+
+            handleContactScroll();
         };
 
         window.addEventListener("resize", handleWindowResize);
@@ -242,20 +333,25 @@ function DownloadResumePage() {
                         gap: "2rem",
                         marginTop: "3rem"
                     }}>
-                    <div className="contactSection">
-                        <p style={{ fontSize: "1.2rem", lineHeight: 1.6, marginBottom: "0.2rem" }}>
-                            Let's stay in touch:
-                        </p>
-                        <div className="buttonContainer">
-                            <a href="https://www.linkedin.com/in/ilija-kujovic-126352204" target="_blank">
+                    <div className="contactSpacer" />
+                    <div className="contactSection" ref={contactRowRef}>
+                        <div className="buttonContainer" ref={(el) => { contactItemRefs.current[0] = el; }}
+                            style={{ cursor: "pointer" }}
+                            onClick={() => openServerLink('/3lknm')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openServerLink('/3lknm'); }}
+                            >
                                 <img className="contactImg" src="/LinkedinLogo.png" ></img>
-                            </a>
                         </div>
-                        <div className="buttonContainer">
-                            <a href="https://github.com/ilijaq" target="_blank">
-                                <img className="contactImg" src="/GithubIcoWhite.png" ></img>
-                            </a>
+                        <div className="buttonContainer" ref={(el) => { contactItemRefs.current[1] = el; }}
+                            style={{ cursor: "pointer" }}
+                            onClick={() => openServerLink('/2msd1')}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openServerLink('/2msd1'); }}
+                            >
+                                <img className="contactImg" src="/GmailLogo.png" ></img>
                         </div>
+                        <p className="contactText" ref={contactTextRef}>
+                            Let's stay in touch
+                        </p>
                     </div>
                 </div>
             </section>

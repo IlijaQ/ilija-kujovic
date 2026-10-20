@@ -3,6 +3,7 @@ import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { create3dGlobe } from "../three/globe";
 import '../App.css';
 import './HomePage.css';
+import { BASE_URL } from "../commonVariables";
 
 const breakAtCommas = (text: string) => {
     return text.split(', ').map(segment => segment.replace(/ /g, ' ')).join(', ');
@@ -47,6 +48,59 @@ function breakAtPipe(text: string) {
             ))}
         </span>
     );
+}
+
+async function openServerLink(path: string): Promise<void> {
+    const newTab = window.open('', '_blank');
+    if (newTab) newTab.opener = null;
+
+    try {
+        const response = await fetch(BASE_URL + path);
+        if (!response.ok) {
+            throw new Error(`Server responded with ${response.status}`);
+        }
+
+        const link = await extractDownloadUrl(response);
+        if (!link) {
+            throw new Error('Server did not return a link');
+        }
+
+        if (newTab) {
+            newTab.location.href = link;
+        } else {
+            window.open(link, '_blank', 'noopener,noreferrer');
+        }
+    } catch (err) {
+        newTab?.close();
+        console.error(`Failed to open link for ${path}`, err);
+    }
+}
+async function extractDownloadUrl(response: Response): Promise<string | null> {
+    const text = (await response.text()).trim();
+    if (isHttpUrl(text)) return text;
+
+    try {
+        const data: unknown = JSON.parse(text);
+        if (isHttpUrl(data)) return data;
+        if (data && typeof data === 'object') {
+            for (const key of DOWNLOAD_URL_KEYS) {
+                const candidate = (data as Record<string, unknown>)[key];
+                if (isHttpUrl(candidate)) return candidate;
+            }
+        }
+    } catch {
+        // Not JSON and not a bare URL; fall through.
+    }
+    return null;
+}
+function isHttpUrl(value: unknown): value is string {
+    if (typeof value !== 'string') return false;
+    try {
+        const parsed = new URL(value);
+        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+    } catch {
+        return false;
+    }
 }
 
 function HomePage() {
@@ -302,15 +356,19 @@ function HomePage() {
                 </div>
                 <div className="contactSpacer" />
                 <div className="contactSection" ref={contactRowRef}>
-                    <div className="buttonContainer" ref={(el) => { contactItemRefs.current[0] = el; }}>
-                        <a href="https://www.linkedin.com/in/ilija-kujovic-126352204" target="_blank">
-                        <img className="contactImg" src="/LinkedinLogo.png" ></img>
-                        </a>
+                    <div className="buttonContainer" ref={(el) => { contactItemRefs.current[0] = el; }}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => openServerLink('/3lknm')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openServerLink('/3lknm'); }}
+                        >
+                            <img className="contactImg" src="/LinkedinLogo.png" ></img>
                     </div>
-                    <div className="buttonContainer" ref={(el) => { contactItemRefs.current[1] = el; }}>
-                        <a href="https://github.com/ilijaq" target="_blank">
-                        <img className="contactImg" src="/GmailLogo.png" ></img>
-                        </a>
+                    <div className="buttonContainer" ref={(el) => { contactItemRefs.current[1] = el; }}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => openServerLink('/2msd1')}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openServerLink('/2msd1'); }}
+                        >
+                            <img className="contactImg" src="/GmailLogo.png" ></img>
                     </div>
                     <p className="contactText" ref={contactTextRef}>
                         Let's stay in touch
