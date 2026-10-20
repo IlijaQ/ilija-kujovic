@@ -309,7 +309,7 @@ function HomePage() {
                     </div>
                     <div className="buttonContainer" ref={(el) => { contactItemRefs.current[1] = el; }}>
                         <a href="https://github.com/ilijaq" target="_blank">
-                        <img className="contactImg" src="/GithubIcoWhite.png" ></img>
+                        <img className="contactImg" src="/GmailLogo.png" ></img>
                         </a>
                     </div>
                     <p className="contactText" ref={contactTextRef}>
