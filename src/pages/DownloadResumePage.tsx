@@ -5,8 +5,6 @@ import '../App.css';
 import './DownloadResumePage.css';
 import { BASE_URL } from "../commonVariables.ts";
 
-const DOWNLOAD_URL_KEYS = ['url', 'downloadUrl', 'download_url', 'link', 'downloadLink', 'download_link'];
-
 
 async function openServerLink(path: string): Promise<void> {
     const newTab = window.open('', '_blank');
@@ -34,30 +32,11 @@ async function openServerLink(path: string): Promise<void> {
     }
 }
 async function extractDownloadUrl(response: Response): Promise<string | null> {
-    const text = (await response.text()).trim();
-    if (isHttpUrl(text)) return text;
-
     try {
-        const data: unknown = JSON.parse(text);
-        if (isHttpUrl(data)) return data;
-        if (data && typeof data === 'object') {
-            for (const key of DOWNLOAD_URL_KEYS) {
-                const candidate = (data as Record<string, unknown>)[key];
-                if (isHttpUrl(candidate)) return candidate;
-            }
-        }
+        const data: { link?: string } = await response.json();
+        return data.link != null ? data.link : null;
     } catch {
-        // Not JSON and not a bare URL; fall through.
-    }
-    return null;
-}
-function isHttpUrl(value: unknown): value is string {
-    if (typeof value !== 'string') return false;
-    try {
-        const parsed = new URL(value);
-        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-    } catch {
-        return false;
+        return null;
     }
 }
 
@@ -96,18 +75,13 @@ function DownloadResumePage() {
                     setError('Server did not return a download link');
                     return;
                 }
-                // The link points to Google Drive and serves the file as an
-                // attachment, so navigating to it starts the download without
-                // leaving this page.
+                
                 window.location.assign(downloadUrl);
                 setPin('');
                 setDownloadSuccess(true);
             } else {
-                if (response.status === 401) {
-                    setError('Unauthorized PIN');
-                } else {
-                    setError(response.statusText);
-                }
+                const message: { error?: string } = await response.json();
+                setError(message.error ?? response.statusText);
             }     
         } catch (err) {
             setError('Error Downloading Resume');
@@ -170,9 +144,7 @@ function DownloadResumePage() {
                 const maxScroll = 500;
                 const t = Math.min(window.scrollY / maxScroll, 1);
                 
-                globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);
-
-                
+                globe.position.x = (1 - t) * 0 + t * (globeRadius * 1.1);                
             }
         }
         
