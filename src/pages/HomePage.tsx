@@ -76,30 +76,11 @@ async function openServerLink(path: string): Promise<void> {
     }
 }
 async function extractDownloadUrl(response: Response): Promise<string | null> {
-    const text = (await response.text()).trim();
-    if (isHttpUrl(text)) return text;
-
     try {
-        const data: unknown = JSON.parse(text);
-        if (isHttpUrl(data)) return data;
-        if (data && typeof data === 'object') {
-            for (const key of DOWNLOAD_URL_KEYS) {
-                const candidate = (data as Record<string, unknown>)[key];
-                if (isHttpUrl(candidate)) return candidate;
-            }
-        }
+        const data: { link?: string } = await response.json();
+        return data.link != null ? data.link : null;
     } catch {
-        // Not JSON and not a bare URL; fall through.
-    }
-    return null;
-}
-function isHttpUrl(value: unknown): value is string {
-    if (typeof value !== 'string') return false;
-    try {
-        const parsed = new URL(value);
-        return parsed.protocol === 'https:' || parsed.protocol === 'http:';
-    } catch {
-        return false;
+        return null;
     }
 }
 
