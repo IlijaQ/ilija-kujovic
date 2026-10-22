@@ -75,7 +75,7 @@ function DownloadResumePage() {
             if (response.ok) {
                 const downloadUrl = await extractDownloadUrl(response);
                 if (!downloadUrl) {
-                    console.log(JSON.stringify(response))
+                    console.log(JSON.stringify(response.body))
                     setError('Server did not return a download link');
                     return;
                 }
