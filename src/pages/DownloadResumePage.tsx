@@ -18,6 +18,7 @@ async function openServerLink(path: string): Promise<void> {
 
         const link = await extractDownloadUrl(response);
         if (!link) {
+            console.log(JSON.stringify(response))
             throw new Error('Server did not return a link');
         }
 
@@ -62,6 +63,8 @@ function DownloadResumePage() {
         setError('');
         setDownloadSuccess(false);
 
+        console.log(JSON.stringify({ pin }))
+
         try {
             const response = await fetch(BASE_URL + '/1ctvd', {
                 method: 'POST',
@@ -75,7 +78,7 @@ function DownloadResumePage() {
                     setError('Server did not return a download link');
                     return;
                 }
-                
+
                 window.location.assign(downloadUrl);
                 setPin('');
                 setDownloadSuccess(true);
