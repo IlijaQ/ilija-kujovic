@@ -18,7 +18,7 @@ async function openServerLink(path: string): Promise<void> {
 
         const link = await extractDownloadUrl(response);
         if (!link) {
-            console.log(JSON.stringify(response))
+            
             throw new Error('Server did not return a link');
         }
 
@@ -75,6 +75,7 @@ function DownloadResumePage() {
             if (response.ok) {
                 const downloadUrl = await extractDownloadUrl(response);
                 if (!downloadUrl) {
+                    console.log(JSON.stringify(response))
                     setError('Server did not return a download link');
                     return;
                 }
