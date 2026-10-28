@@ -66,7 +66,7 @@ function DownloadResumePage() {
         console.log(JSON.stringify({ pin }))
 
         try {
-            const response = await fetch(BASE_URL + '/1ctvd', {
+            const response = await fetch(http://localhost:3000 + '/1ctvd', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pin }),
